@@ -1,7 +1,7 @@
 SIP Load Tester
 ===============
-Version	: 1.0
-Dated	: 05.02.2024
+Version	: 1.1
+Dated	: 26.02.2024
 
 This Software is SIP Call generator and acceptor with text based configuration. It currently supports 200 calls (can be initiator and terminator), UDP Protocol.
 
@@ -19,6 +19,7 @@ Configuration file "SIPTester.properties" is used for configuration. There are f
 | SERVER_IP_ADDR=172.210.120.120     | The Server IP Address where packet will be sent |
 | SERVER_PORT=5060                   | Port Number of the Server                       |
 | TRANSPORT=UDP                      | Transport Protocol to use                      |
+| REGISTER_REQUIRED=0                | Is REGISTER Required (1-Required, 0-Not Required) | 
 | ENDPOINTS=18001:1:200              | Endpoints to create, Format: PHONE NUMBER:STEPS:TOTAL COUNT. It creates Phone numbers 18001, 18002, 18003 .. 200 Numbers are created.                      |
 | CALLS=18001:2:2->18002:2:2         | Calls to create, Format: INITIATOR PHONE NUMBER:STEPS:TOTAL COUNT->TERMINATOR PHONE NUMBER:STEPS:TOTAL COUNT. It means 18001 calls to 18002, 18003 calls to 18004.                     |
 | NUM_CALLS_TO_GENERATE=20           | No of Calls to Generate from One endpoint to another                        |

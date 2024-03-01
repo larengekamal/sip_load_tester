@@ -86,6 +86,7 @@ public class SIPClient implements SipListener, Runnable {
     long call_connected_time;
     
     private ArrayList<SIPCallStats> sipCallStatsReport = new ArrayList<SIPCallStats>();
+    private boolean isNoInitiator;
 
     class SIPCallStats {
 
@@ -116,7 +117,10 @@ public class SIPClient implements SipListener, Runnable {
         }
         logger.info("Stopping Thread");
         try {
-            SendREGISTER(0);
+            if(this.configParams.getREGISTER_REQUIRED() == 1)
+            {
+                SendREGISTER(0);
+            }
             try {
                 Thread.sleep(500);
             } catch (InterruptedException ex) {
@@ -286,7 +290,7 @@ public class SIPClient implements SipListener, Runnable {
         this.init();
     }
 
-    public SIPClient(boolean isCallInitiator, String fromName, String fromDisplayName, String fromSipAddress, String toUser, String toDisplayName, String toSipAddress, String transport, String peerHostPort, int stackID) {
+    public SIPClient(boolean isCallInitiator, String fromName, String fromDisplayName, String fromSipAddress, String toUser, String toDisplayName, String toSipAddress, String transport, String peerHostPort, int stackID, boolean isNoInitiator) {
         logger.info("==================================================");
         logger.info("             SIPClient Constructor ");
         logger.info("==================================================");
@@ -300,6 +304,7 @@ public class SIPClient implements SipListener, Runnable {
         this.transport = transport;
         this.peerHostPort = peerHostPort;
         this.stackID = stackID;
+        this.isNoInitiator = isNoInitiator;
 
         Thread.currentThread().setName(APP_NAME + "#" + this.stackID);
 
@@ -317,11 +322,13 @@ public class SIPClient implements SipListener, Runnable {
         logger.info("transport=" + transport);
         logger.info("peerHostPort=" + peerHostPort);
         logger.info("stackID=" + stackID);
+        logger.info("isNoInitiator=" + isNoInitiator);
         logger.info("callAcceptAfter_milisec=" + callAcceptAfter_milisec);
         logger.info("callDisconnectAfter_milisec=" + callDisconnectAfter_milisec);
         logger.info("totalNumOfCalls=" + totalNumOfCalls);
         logger.info("callInitiateAfter_milisec=" + callInitiateAfter_milisec);
         this.init();
+        
     }
 
     public ArrayList<SIPCallStats> getSipCallStatsReport() {
@@ -444,14 +451,19 @@ public class SIPClient implements SipListener, Runnable {
                     }
                     callCount_successCalls = callCount_successCalls + 1;
                 }
-                //            SipProvider provider = (SipProvider) requestEvent.getSource();
-                //            Request byeRequest = dialog.createRequest(Request.BYE);
-                //            ClientTransaction ct = provider
-                //                    .getNewClientTransaction(byeRequest);
-                //                dialog.sendRequest(ct);
-                //            FromHeader fromHeader = (FromHeader) byeRequest.getHeader("From");
-                //            ToHeader toHeader = (ToHeader) byeRequest.getHeader("To");
-                //            logger.info(stackID+"# "+"Sent BYE " + fromHeader.getAddress().getURI() + " -> " + toHeader.getAddress().getURI() + " TID=" + ct);
+                if(this.isNoInitiator)
+                {
+                    logger.info("Starting BYE Send Timer for " + callDisconnectAfter_milisec);
+                    byeTimer.schedule(new SIPClient.ByeTask(serverTransaction.getDialog(), this), (callDisconnectAfter_milisec));
+//                    SipProvider provider = (SipProvider) requestEvent.getSource();
+//                    Request byeRequest = dialog.createRequest(Request.BYE);
+//                    ClientTransaction ct = provider
+//                            .getNewClientTransaction(byeRequest);
+//                        dialog.sendRequest(ct);
+//                    FromHeader fromHeader = (FromHeader) byeRequest.getHeader("From");
+//                    ToHeader toHeader = (ToHeader) byeRequest.getHeader("To");
+//                    logger.info(stackID+"# "+"Sent BYE " + fromHeader.getAddress().getURI() + " -> " + toHeader.getAddress().getURI() + " TID=" + ct);
+                }
             } catch (Exception e) {
                 logger.error("Exception in Function processAck " + e.getMessage(), e);
             }
@@ -863,7 +875,19 @@ public class SIPClient implements SipListener, Runnable {
             logger.error("Exception in Function init " + e.getMessage(), e);
 //            usage();
         }
-        SendREGISTER(configParams.getREGISTER_EXPIRY());
+        if(this.configParams.getREGISTER_REQUIRED() == 0)
+        {
+            isRegistered = true;
+            if(this.isCallInitiator)
+            {
+                logger.info("Starting Call Initiate Timer for " + this.configParams.getCALL_INITIATE_AFTER_MILI_SEC());
+                sendInviteTimer.schedule(new SIPClient.SendInviteTask(this), this.configParams.getCALL_INITIATE_AFTER_MILI_SEC());
+            }
+        }
+        else
+        {
+            SendREGISTER(configParams.getREGISTER_EXPIRY());
+        }
     }
 
     public String createNewTag() {

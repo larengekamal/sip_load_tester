@@ -82,6 +82,14 @@ public class ConfigModule {
             } catch (Exception e) {
                 configParams.setTRANSPORT("UDP");
             }
+            
+            try {
+                configParams.setREGISTER_REQUIRED(Integer.parseInt(p.getProperty("REGISTER_REQUIRED").trim()));
+                logger.info("REGISTER_REQUIRED: " + configParams.getREGISTER_REQUIRED() + "#");
+            } catch (Exception e) {
+                configParams.setREGISTER_REQUIRED(1);
+                logger.error("Default REGISTER_REQUIRED: " + configParams.getREGISTER_REQUIRED() + "#", e);
+            }
 
             try {
                 configParams.setENDPOINTS((p.getProperty("ENDPOINTS").trim()));

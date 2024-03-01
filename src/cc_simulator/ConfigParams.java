@@ -37,6 +37,7 @@ public class ConfigParams {
     private int AUDIO_START_PORT;
         
     private int TEST_DURATION;
+    private int REGISTER_REQUIRED;
         
     public static ConfigParams getConfigParams() {
         if (configParams == null) {
@@ -151,6 +152,14 @@ public class ConfigParams {
 
     public void setCALLS(String CALLS) {
         this.CALLS = CALLS;
+    }
+
+    public int getREGISTER_REQUIRED() {
+        return REGISTER_REQUIRED;
+    }
+
+    public void setREGISTER_REQUIRED(int REGISTER_REQUIRED) {
+        this.REGISTER_REQUIRED = REGISTER_REQUIRED;
     }
 
 }

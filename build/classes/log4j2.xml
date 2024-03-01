@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG" name="sip_tester">
+    <properties>
+	<property name="log-path">logs/</property>
+    </properties>
+    <Appenders>	
+        <Console name="LogToConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        
+        <RollingFile name="LogToRollingFile" fileName="${log-path}/app.log"
+                     filePattern="${log-path}/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d %p %C [%t] %m%n%throwable</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="1 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        
+	<!--
+        <RollingRandomAccessFile name="LogToRollingRandomAccessFile" fileName="logs/app.log"
+                                 filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="1 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingRandomAccessFile>
+	-->
+    </Appenders>
+    <Loggers>
+        <!-- avoid duplicated logs with additivity=false -->
+        <Logger name="sipTester" level="info" additivity="false">
+            <AppenderRef ref="LogToRollingFile"/>
+            <AppenderRef ref="LogToConsole"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="LogToConsole"/>
+            <AppenderRef ref="LogToRollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
